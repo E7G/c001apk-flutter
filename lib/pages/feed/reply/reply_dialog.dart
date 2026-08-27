@@ -210,7 +210,7 @@ class _ReplyDialogState extends State<ReplyDialog> with WidgetsBindingObserver {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Captcha'),
+            title: const Text('验证码'),
             content: IntrinsicHeight(
               child: Row(
                 children: [
@@ -231,7 +231,7 @@ class _ReplyDialogState extends State<ReplyDialog> with WidgetsBindingObserver {
                       decoration: const InputDecoration(
                         border: UnderlineInputBorder(),
                         filled: true,
-                        labelText: 'captcha',
+                        labelText: '验证码',
                       ),
                     ),
                   ),
