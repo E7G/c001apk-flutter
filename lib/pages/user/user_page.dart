@@ -300,7 +300,13 @@ class _UserPageState extends State<UserPage> {
                                           ? '取消屏蔽'
                                           : '屏蔽',
                                     )
-                                  : Text(item.name),
+                                  : Text(switch (item) {
+                                      UserMenuItem.Copy => '复制',
+                                      UserMenuItem.Share => '分享',
+                                      UserMenuItem.Report => '举报',
+                                      UserMenuItem.UserInfo => '用户信息',
+                                      _ => item.name,
+                                    }),
                             ))
                         .toList(),
                   ),
