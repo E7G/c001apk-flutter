@@ -535,7 +535,12 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                                                 ? '取消屏蔽'
                                                 : '屏蔽',
                                           )
-                                        : Text(item.name),
+                                        : Text(switch (item) {
+                                            FeedMenuItem.Copy => '复制',
+                                            FeedMenuItem.Share => '分享',
+                                            FeedMenuItem.Report => '举报',
+                                            _ => item.name,
+                                          }),
                               ))
                           .toList(),
                     )
