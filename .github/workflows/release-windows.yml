@@ -1,0 +1,74 @@
+name: Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/release-windows.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-release
+  cancel-in-progress: false
+
+jobs:
+  release-windows:
+    name: Build and release Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package Windows bundle
+        shell: pwsh
+        run: |
+          $bundle = "build/windows/x64/runner/Release"
+          $archive = "c001apk-flutter-windows-x64.zip"
+          if (!(Test-Path $bundle)) {
+            throw "Windows release bundle not found: $bundle"
+          }
+          if (Test-Path $archive) {
+            Remove-Item $archive -Force
+          }
+          Compress-Archive -Path "$bundle\*" -DestinationPath $archive -CompressionLevel Optimal
+          $hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLower()
+          "$hash  $archive" | Out-File -FilePath "$archive.sha256" -Encoding ascii
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: c001apk-flutter-windows-x64
+          path: |
+            c001apk-flutter-windows-x64.zip
+            c001apk-flutter-windows-x64.zip.sha256
+          compression-level: 0
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v1.0.0-win.${{ github.run_number }}"
+          $title = "c001apk-flutter Windows x64 ${{ github.run_number }}"
+          $notes = "Windows x64 release build of c001apk-flutter.`n`nPlatform: Windows x64`nFlutter: stable`nCommit: ${{ github.sha }}`nIncludes SHA-256 checksum"
+          gh release create $tag "c001apk-flutter-windows-x64.zip" "c001apk-flutter-windows-x64.zip.sha256" --target "${{ github.sha }}" --title $title --notes $notes
