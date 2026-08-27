@@ -113,7 +113,14 @@ class _ChatPageState extends State<ChatPage> {
               },
               itemBuilder: (context) => ChatMenuType.values
                   .map((item) =>
-                      PopupMenuItem(value: item, child: Text(item.name)))
+                      PopupMenuItem(
+                        value: item,
+                        child: Text(switch (item) {
+                          ChatMenuType.Check => '查看资料',
+                          ChatMenuType.Block => '屏蔽',
+                          ChatMenuType.Report => '举报',
+                        }),
+                      ))
                   .toList())
         ],
       ),
