@@ -61,7 +61,7 @@ class _SearchPageState extends State<SearchPage> {
           },
           decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: 'Search${!_title.isNullOrEmpty ? ' in $_title' : ''}',
+            hintText: '搜索${!_title.isNullOrEmpty ? '：$_title' : ''}',
             hintStyle: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.normal,
@@ -85,7 +85,7 @@ class _SearchPageState extends State<SearchPage> {
                       _clearStream.add(false);
                     },
                     icon: const Icon(Icons.clear),
-                    tooltip: 'Clear',
+                    tooltip: '清除',
                   )
                 : const SizedBox.shrink(),
           ),
@@ -94,7 +94,7 @@ class _SearchPageState extends State<SearchPage> {
               onSearch(_controller.text);
             },
             icon: const Icon(Icons.search),
-            tooltip: 'Search',
+            tooltip: '搜索',
           ),
         ],
         bottom: const PreferredSize(
@@ -120,7 +120,7 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Clear All',
+                      tooltip: '全部清除',
                       onPressed: () => showDialog(
                           context: context,
                           builder: (context) => AlertDialog(

@@ -57,7 +57,7 @@ class _UserPageState extends State<UserPage> {
           child: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.all(10.0),
-            child: const Text('EMPTY'),
+            child: const Text('暂无内容'),
           ),
         );
       case Error():
@@ -94,7 +94,7 @@ class _UserPageState extends State<UserPage> {
               height: 80,
               alignment: Alignment.center,
               padding: const EdgeInsets.all(10.0),
-              child: const Text('EMPTY'),
+              child: const Text('暂无内容'),
             ),
           ),
         );
@@ -234,7 +234,7 @@ class _UserPageState extends State<UserPage> {
                         'pageParam': _userController.uid,
                       }),
                       icon: const Icon(Icons.search),
-                      tooltip: 'Search',
+                      tooltip: '搜索',
                     ),
                   PopupMenuButton(
                     onSelected: (UserMenuItem item) {
@@ -264,7 +264,7 @@ class _UserPageState extends State<UserPage> {
                           if (Utils.isSupportWebview()) {
                             Utils.report(_userController.uid, ReportType.User);
                           } else {
-                            SmartDialog.showToast('not supported');
+                            SmartDialog.showToast('暂不支持');
                           }
                           break;
                         case UserMenuItem.UserInfo:
@@ -297,10 +297,16 @@ class _UserPageState extends State<UserPage> {
                               child: item == UserMenuItem.Block
                                   ? Text(
                                       _userController.isBlocked
-                                          ? 'UnBlock'
-                                          : 'Block',
+                                          ? '取消屏蔽'
+                                          : '屏蔽',
                                     )
-                                  : Text(item.name),
+                                  : Text(switch (item) {
+                                      UserMenuItem.Copy => '复制',
+                                      UserMenuItem.Share => '分享',
+                                      UserMenuItem.Report => '举报',
+                                      UserMenuItem.UserInfo => '用户信息',
+                                      _ => item.name,
+                                    }),
                             ))
                         .toList(),
                   ),

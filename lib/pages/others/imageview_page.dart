@@ -64,7 +64,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
                         children: [
                           ListTile(
                             title: const Text(
-                              'Save',
+                              '保存',
                               style: TextStyle(fontSize: 14),
                             ),
                             onTap: () {
@@ -76,7 +76,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
                           if (_imgList.length != 1)
                             ListTile(
                               title: const Text(
-                                'Save All',
+                                '全部保存',
                                 style: TextStyle(fontSize: 14),
                               ),
                               onTap: () {
@@ -86,7 +86,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
                             ),
                           ListTile(
                             title: const Text(
-                              'Share',
+                              '分享',
                               style: TextStyle(fontSize: 14),
                             ),
                             onTap: () {
@@ -96,7 +96,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
                           ),
                           ListTile(
                             title: const Text(
-                              'Copy',
+                              '复制',
                               style: TextStyle(fontSize: 14),
                             ),
                             onTap: () {
@@ -107,7 +107,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
                           if (Utils.isDesktop)
                             ListTile(
                               title: const Text(
-                                'Open In Browser',
+                                '在浏览器中打开',
                                 style: TextStyle(fontSize: 14),
                               ),
                               onTap: () {

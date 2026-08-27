@@ -106,14 +106,21 @@ class _ChatPageState extends State<ChatPage> {
                     if (Utils.isSupportWebview()) {
                       Utils.report(_uid, ReportType.User);
                     } else {
-                      SmartDialog.showToast('not supported');
+                      SmartDialog.showToast('暂不支持');
                     }
                     break;
                 }
               },
               itemBuilder: (context) => ChatMenuType.values
                   .map((item) =>
-                      PopupMenuItem(value: item, child: Text(item.name)))
+                      PopupMenuItem(
+                        value: item,
+                        child: Text(switch (item) {
+                          ChatMenuType.Check => '查看资料',
+                          ChatMenuType.Block => '屏蔽',
+                          ChatMenuType.Report => '举报',
+                        }),
+                      ))
                   .toList())
         ],
       ),
@@ -303,7 +310,7 @@ class _ChatPageState extends State<ChatPage> {
               );
             },
             icon: const Icon(Icons.emoji_emotions_outlined),
-            tooltip: 'Emoji',
+            tooltip: '表情',
           ),
           Expanded(
             child: Listener(
@@ -420,7 +427,7 @@ class _ChatPageState extends State<ChatPage> {
                   icon: Icon(snapshot.data == true
                       ? Icons.send
                       : Icons.add_photo_alternate_outlined),
-                  tooltip: snapshot.data == true ? 'Send' : 'Image',
+                  tooltip: snapshot.data == true ? '发送' : '图片',
                 );
               }),
         ],

@@ -77,7 +77,7 @@ class AppInfoCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '更新时间: ${data.lastupdate != null ? DateUtil.fromToday(data.lastupdate) : 'null'}',
+                            '更新时间: ${data.lastupdate != null ? DateUtil.fromToday(data.lastupdate) : '未知'}',
                             style: const TextStyle(
                               fontSize: 14,
                             ),

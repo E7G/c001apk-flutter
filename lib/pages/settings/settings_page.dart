@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage>
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('设置'),
         actions: [
           PopupMenuButton(
             onSelected: (SettingsMenuItem item) {
@@ -83,7 +83,10 @@ class _SettingsPageState extends State<SettingsPage>
             itemBuilder: (context) => SettingsMenuItem.values
                 .map((item) => PopupMenuItem<SettingsMenuItem>(
                       value: item,
-                      child: Text(item.name),
+                      child: Text(switch (item) {
+                        SettingsMenuItem.Feedback => '反馈',
+                        SettingsMenuItem.About => '关于',
+                      }),
                     ))
                 .toList(),
           )
@@ -103,13 +106,13 @@ class _SettingsPageState extends State<SettingsPage>
           ),
           ListTile(
             leading: const Icon(Icons.developer_mode),
-            title: const Text('Params'),
+            title: const Text('参数'),
             onTap: () => Get.toNamed('/params'),
           ),
           // Theme
           ListTile(
             title: Text(
-              'Theme',
+              '主题',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -117,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage>
           ),
           const SwitchItem(
             icon: Icons.palette_outlined,
-            title: 'Dynamic Theme',
+            title: '动态主题',
             boxKey: SettingsBoxKey.useMaterial,
             defaultValue: true,
             forceAppUpdate: true,
@@ -126,12 +129,33 @@ class _SettingsPageState extends State<SettingsPage>
             visible: !GStorage.useMaterial,
             child: DropDownMenuItem(
               icon: Icons.format_color_fill,
-              title: 'Theme Color',
+              title: '主题颜色',
               boxKey: SettingsBoxKey.staticColor,
               items: Constants.themeType
                   .map((type) => DropdownMenuItem<int>(
                         value: Constants.themeType.indexOf(type),
-                        child: Text(type),
+                        child: Text(switch (type) {
+                          'Default' => '默认',
+                          'Red' => '红色',
+                          'Pink' => '粉色',
+                          'Purple' => '紫色',
+                          'Indigo' => '靛蓝',
+                          'Blue' => '蓝色',
+                          'LightBlue' => '浅蓝色',
+                          'Cyan' => '青色',
+                          'Teal' => '蓝绿色',
+                          'Green' => '绿色',
+                          'LightGreen' => '浅绿色',
+                          'Lime' => '青柠色',
+                          'Yellow' => '黄色',
+                          'Amber' => '琥珀色',
+                          'Orange' => '橙色',
+                          'DeepOrange' => '深橙色',
+                          'Brown' => '棕色',
+                          'BlueGrey' => '蓝灰色',
+                          'Sakura' => '樱花色',
+                          _ => type,
+                        }),
                       ))
                   .toList(),
               forceAppUpdate: true,
@@ -139,20 +163,20 @@ class _SettingsPageState extends State<SettingsPage>
           ),
           const DropDownMenuItem(
             icon: Icons.dark_mode_outlined,
-            title: 'Dark Mode',
+            title: '深色模式',
             boxKey: SettingsBoxKey.selectedTheme,
             items: [
               DropdownMenuItem<int>(
                 value: 1,
-                child: Text('Always Off'),
+                child: Text('始终关闭'),
               ),
               DropdownMenuItem<int>(
                 value: 2,
-                child: Text('Always On'),
+                child: Text('始终开启'),
               ),
               DropdownMenuItem<int>(
                 value: 0,
-                child: Text('Follow System'),
+                child: Text('跟随系统'),
               ),
             ],
             forceAppUpdate: true,
@@ -160,14 +184,14 @@ class _SettingsPageState extends State<SettingsPage>
           // Display
           ListTile(
             title: Text(
-              'Display',
+              '显示',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
           ListTile(
-            title: const Text('User Blacklist'),
+            title: const Text('用户黑名单'),
             leading: const Icon(Icons.block),
             onTap: () => Get.toNamed(
               '/blacklist/',
@@ -175,7 +199,7 @@ class _SettingsPageState extends State<SettingsPage>
             ),
           ),
           ListTile(
-            title: const Text('Topic Blacklist'),
+            title: const Text('话题黑名单'),
             leading: const Icon(Icons.block),
             onTap: () => Get.toNamed(
               '/blacklist/',
@@ -183,7 +207,7 @@ class _SettingsPageState extends State<SettingsPage>
             ),
           ),
           ListTile(
-            title: const Text('Font Scale'),
+            title: const Text('字体缩放'),
             subtitle: Text('${GStorage.fontScale.toStringAsFixed(2)}x'),
             leading: const Icon(Icons.text_fields),
             onTap: () => showDialog<void>(
@@ -199,78 +223,88 @@ class _SettingsPageState extends State<SettingsPage>
           ),
           DropDownMenuItem(
             icon: Icons.add_circle_outline_outlined,
-            title: 'Follow Type',
+            title: '关注类型',
             boxKey: SettingsBoxKey.followType,
             items: FollowType.values
                 .map((type) => DropdownMenuItem<int>(
                       value: FollowType.values.indexOf(type),
-                      child: Text(type.name),
+                      child: Text(switch (type) {
+                        FollowType.ALL => '全部',
+                        FollowType.USER => '用户',
+                        FollowType.TOPIC => '话题',
+                        FollowType.PRODUCT => '产品',
+                        FollowType.APP => '应用',
+                      }),
                     ))
                 .toList(),
           ),
           /*
           DropDownMenuItem(
             icon: Icons.image_outlined,
-            title: 'Image Quality',
+            title: '图片质量',
             boxKey: SettingsBoxKey.imageQuality,
             items: ImageQuality.values
                 .map((type) => DropdownMenuItem<int>(
                       value: ImageQuality.values.indexOf(type),
-                      child: Text(type.name),
+                      child: Text(switch (type) {
+                        ImageQuality.AUTO => '自动',
+                        ImageQuality.ORIGIN => '原图',
+                        ImageQuality.THUMBNAIL => '缩略图',
+                      }),
                     ))
                 .toList(),
           ),
           const SwitchItem(
             icon: Icons.image_outlined,
-            title: 'Image Dim',
+            title: '图片变暗',
             boxKey: SettingsBoxKey.imageDim,
             defaultValue: true,
           ),
           */
           const SwitchItem(
             icon: Icons.travel_explore,
-            title: 'Open In Browser',
+            title: '在浏览器中打开',
             boxKey: SettingsBoxKey.openInBrowser,
             defaultValue: false,
           ),
           /*
           const SwitchItem(
             icon: Icons.feed_outlined,
-            title: 'Show Square',
+            title: '显示广场',
             boxKey: SettingsBoxKey.showSquare,
             defaultValue: true,
           ),
           */
           const SwitchItem(
             icon: Icons.history,
-            title: 'Record History',
+            title: '记录浏览历史',
             boxKey: SettingsBoxKey.recordHistory,
             defaultValue: true,
           ),
           const SwitchItem(
             icon: Icons.emoji_emotions_outlined,
-            title: 'Show Emoji',
+            title: '显示表情',
             boxKey: SettingsBoxKey.showEmoji,
             defaultValue: true,
           ),
           if (Platform.isAndroid)
             const SwitchItem(
               icon: Icons.system_update,
-              title: 'Check Update',
+              title: '检查更新',
               boxKey: SettingsBoxKey.checkUpdate,
               defaultValue: true,
             ),
           // Others
           ListTile(
             title: Text(
-              'Others',
+              '其他',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
           ListTile(
-            title: const Text('About'),
+            title: const Text('关于'),
             subtitle: Text(_version),
             leading: const Icon(Icons.all_inclusive),
             onTap: () =>
@@ -278,7 +312,7 @@ class _SettingsPageState extends State<SettingsPage>
           ),
           Obx(
             () => ListTile(
-              title: const Text('Clear Cache'),
+              title: const Text('清除缓存'),
               subtitle: _settingsController.cacheSize.value.isNotEmpty
                   ? Text(_settingsController.cacheSize.value)
                   : null,

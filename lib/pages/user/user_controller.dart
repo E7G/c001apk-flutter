@@ -72,7 +72,7 @@ class UserController extends CommonController {
   }
 
   void setBlockedLoaidngState() {
-    loadingState.value = LoadingState.error('$username is Blocked');
+    loadingState.value = LoadingState.error('$username 已被屏蔽');
   }
 
   @override

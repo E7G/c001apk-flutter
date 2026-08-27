@@ -95,7 +95,7 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
           child: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.all(10.0),
-            child: const Text('EMPTY'),
+            child: const Text('暂无内容'),
           ),
         );
       case Error():
@@ -164,7 +164,7 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                         //   ),
                         // );
                       },
-                      tooltip: 'Create Feed',
+                      tooltip: '发布动态',
                       child: const Icon(Icons.add),
                     )
                   : null,
@@ -202,7 +202,7 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                             : _topicController.id!,
                       }),
                       icon: const Icon(Icons.search),
-                      tooltip: 'Search',
+                      tooltip: '搜索',
                     ),
                   PopupMenuButton(
                     onSelected: (TopicMenuItem item) {
@@ -265,11 +265,11 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: TopicMenuItem.Copy,
-                        child: Text(TopicMenuItem.Copy.name),
+                        child: const Text('复制'),
                       ),
                       PopupMenuItem(
                         value: TopicMenuItem.Share,
-                        child: Text(TopicMenuItem.Share.name),
+                        child: const Text('分享'),
                       ),
                       if (_shouldShowActions)
                         PopupMenuItem(
@@ -278,7 +278,7 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                             children: [
                               Expanded(
                                 flex: 1,
-                                child: Text(TopicMenuItem.Sort.name),
+                                child: const Text('排序'),
                               ),
                               const Icon(Icons.arrow_right)
                             ],
@@ -287,12 +287,12 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                       PopupMenuItem(
                         value: TopicMenuItem.Follow,
                         child: Text(
-                            _topicController.isFollow ? 'UnFollow' : 'Follow'),
+                            _topicController.isFollow ? '取消关注' : '关注'),
                       ),
                       PopupMenuItem(
                         value: TopicMenuItem.Block,
                         child: Text(
-                            _topicController.isBlocked ? 'UnBlock' : 'Block'),
+                            _topicController.isBlocked ? '取消屏蔽' : '屏蔽'),
                       ),
                     ],
                   ),
@@ -300,7 +300,7 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
               ),
               body: _topicController.isBlocked
                   ? Center(
-                      child: Text('${_topicController.title} is Blocked'),
+                      child: Text('${_topicController.title} 已被屏蔽'),
                     )
                   : TabBarView(
                       controller: _tabController,
@@ -333,7 +333,14 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
       position:
           RelativeRect.fromLTRB(screenSize.width, 0, 0, screenSize.height),
       items: TopicSortType.values
-          .map((type) => PopupMenuItem(value: type, child: Text(type.name)))
+          .map((type) => PopupMenuItem(
+                value: type,
+                child: Text(switch (type) {
+                  TopicSortType.DEFAULT => '默认',
+                  TopicSortType.DATELINE => '最新',
+                  TopicSortType.HOT => '热门',
+                }),
+              ))
           .toList(),
       elevation: 8.0,
     ).then((value) {

@@ -153,7 +153,7 @@ class _AppUpdateCardState extends State<AppUpdateCard> {
                         onTap: () => setState(
                             () => _maxLines = _maxLines == 2 ? 999 : 2),
                         child: Text(
-                          widget.data.changelog ?? 'no changelog',
+                          widget.data.changelog ?? '暂无更新日志',
                           maxLines: _maxLines,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

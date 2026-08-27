@@ -140,12 +140,21 @@ class _WebviewPageState extends State<WebviewPage> {
             },
             itemBuilder: (context) => <PopupMenuEntry<WebviewMenuItem>>[
               ...WebviewMenuItem.values.sublist(0, 4).map(
-                  (item) => PopupMenuItem(value: item, child: Text(item.name))),
+                  (item) => PopupMenuItem(
+                    value: item,
+                    child: Text(switch (item) {
+                      WebviewMenuItem.Refresh => '刷新',
+                      WebviewMenuItem.Copy => '复制链接',
+                      WebviewMenuItem.Open_In_Browser => '在浏览器中打开',
+                      WebviewMenuItem.Clear_Cache => '清除缓存',
+                      WebviewMenuItem.Go_Back => '返回',
+                    }),
+                  )),
               const PopupMenuDivider(),
               PopupMenuItem(
                   value: WebviewMenuItem.Go_Back,
                   child: Text(
-                    WebviewMenuItem.Go_Back.name,
+                    '返回',
                     style:
                         TextStyle(color: Theme.of(context).colorScheme.error),
                   )),
@@ -240,14 +249,14 @@ class _WebviewPageState extends State<WebviewPage> {
                 }
                 return AlertDialog(
                   title: Text(
-                    'Download file: $suggestedFilename ?',
+                    '下载文件：$suggestedFilename？',
                     style: const TextStyle(fontSize: 18),
                   ),
                   content: SelectableText(request.url.toString()),
                   actions: [
                     TextButton(
                         onPressed: () => Get.back(),
-                        child: const Text('Close')),
+                        child: const Text('关闭')),
                     TextButton(
                         onPressed: () async {
                           Get.back();
@@ -256,7 +265,7 @@ class _WebviewPageState extends State<WebviewPage> {
                             suggestedFilename,
                           );
                         },
-                        child: Text('OK ($fileSize)')),
+                        child: Text('确定（$fileSize）')),
                   ],
                 );
               });
