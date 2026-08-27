@@ -29,6 +29,40 @@ enum SearchType {
 
 enum SearchSortType { DATELINE, DEFAULT, HOT, REPLY, STRICT }
 
+String searchContentTypeLabel(SearchContentType type) => switch (type) {
+      SearchContentType.FEED => '动态',
+      SearchContentType.APP => '应用',
+      SearchContentType.GAME => '游戏',
+      SearchContentType.TOPIC => '话题',
+      SearchContentType.PRODUCT => '产品',
+      SearchContentType.USER => '用户',
+    };
+
+String searchMenuTypeLabel(SearchMenuType type) => switch (type) {
+      SearchMenuType.Type => '类型',
+      SearchMenuType.Sort => '排序',
+    };
+
+String searchTypeLabel(SearchType type) => switch (type) {
+      SearchType.ALL => '全部',
+      SearchType.FEED => '动态',
+      SearchType.ARTICLE => '文章',
+      SearchType.COOLPIC => '酷图',
+      SearchType.COMMENT => '评论',
+      SearchType.RATING => '评分',
+      SearchType.ANSWER => '回答',
+      SearchType.QUESTION => '问题',
+      SearchType.VOTE => '投票',
+    };
+
+String searchSortTypeLabel(SearchSortType type) => switch (type) {
+      SearchSortType.DATELINE => '按时间',
+      SearchSortType.DEFAULT => '默认',
+      SearchSortType.HOT => '热门',
+      SearchSortType.REPLY => '按回复',
+      SearchSortType.STRICT => '严格匹配',
+    };
+
 class SearchResultPage extends StatefulWidget {
   const SearchResultPage({super.key});
 
@@ -130,7 +164,7 @@ class _SearchResultPageState extends State<SearchResultPage>
                                 children: [
                                   Expanded(
                                     flex: 1,
-                                    child: Text(item.name),
+                                    child: Text(searchMenuTypeLabel(item)),
                                   ),
                                   const Icon(Icons.arrow_right)
                                 ],
@@ -147,7 +181,7 @@ class _SearchResultPageState extends State<SearchResultPage>
                 controller: _tabController,
                 tabs: SearchContentType.values
                     .map((type) => Tab(
-                          text: type.name,
+                          text: searchContentTypeLabel(type),
                         ))
                     .toList(),
                 onTap: (index) {
@@ -204,10 +238,10 @@ class _SearchResultPageState extends State<SearchResultPage>
           RelativeRect.fromLTRB(screenSize.width, 0, 0, screenSize.height),
       items: isSearchType
           ? SearchType.values
-              .map((type) => PopupMenuItem(value: type, child: Text(type.name)))
+              .map((type) => PopupMenuItem(value: type, child: Text(searchTypeLabel(type))))
               .toList()
           : SearchSortType.values
-              .map((type) => PopupMenuItem(value: type, child: Text(type.name)))
+              .map((type) => PopupMenuItem(value: type, child: Text(searchSortTypeLabel(type))))
               .toList(),
       elevation: 8.0,
     ).then((value) {
