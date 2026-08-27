@@ -305,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                                 decoration: InputDecoration(
                                   border: const UnderlineInputBorder(),
                                   filled: true,
-                                  labelText: 'captcha',
+                                  labelText: '验证码',
                                   suffixIcon: StreamBuilder(
                                     stream: _showClearCaptcha.stream,
                                     builder: (_, snapshot) =>
