@@ -640,7 +640,7 @@ class _ReplyPageState extends State<ReplyPage>
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Captcha'),
+            title: const Text('验证码'),
             content: IntrinsicHeight(
               child: Row(
                 children: [
@@ -661,7 +661,7 @@ class _ReplyPageState extends State<ReplyPage>
                       decoration: const InputDecoration(
                         border: UnderlineInputBorder(),
                         filled: true,
-                        labelText: 'captcha',
+                        labelText: '验证码',
                       ),
                     ),
                   ),
