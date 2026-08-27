@@ -140,12 +140,21 @@ class _WebviewPageState extends State<WebviewPage> {
             },
             itemBuilder: (context) => <PopupMenuEntry<WebviewMenuItem>>[
               ...WebviewMenuItem.values.sublist(0, 4).map(
-                  (item) => PopupMenuItem(value: item, child: Text(item.name))),
+                  (item) => PopupMenuItem(
+                    value: item,
+                    child: Text(switch (item) {
+                      WebviewMenuItem.Refresh => '刷新',
+                      WebviewMenuItem.Copy => '复制链接',
+                      WebviewMenuItem.Open_In_Browser => '在浏览器中打开',
+                      WebviewMenuItem.Clear_Cache => '清除缓存',
+                      WebviewMenuItem.Go_Back => '返回',
+                    }),
+                  )),
               const PopupMenuDivider(),
               PopupMenuItem(
                   value: WebviewMenuItem.Go_Back,
                   child: Text(
-                    WebviewMenuItem.Go_Back.name,
+                    '返回',
                     style:
                         TextStyle(color: Theme.of(context).colorScheme.error),
                   )),
