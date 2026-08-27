@@ -116,7 +116,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
           child: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.all(10.0),
-            child: const Text('EMPTY'),
+            child: const Text('暂无内容'),
           ),
         );
       case Error():
@@ -337,7 +337,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
             height: 80,
             alignment: Alignment.center,
             padding: const EdgeInsets.all(10.0),
-            child: const Text('EMPTY'),
+            child: const Text('暂无内容'),
           ),
         );
       case Error():
@@ -432,7 +432,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                 )),
                 child: FloatingActionButton(
                   heroTag: null,
-                  tooltip: 'Reply',
+                  tooltip: '回复',
                   onPressed: () {
                     _onReply(
                       ReplyType.feed,
@@ -517,7 +517,7 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                             if (Utils.isSupportWebview()) {
                               Utils.report(_id, ReportType.Feed);
                             } else {
-                              SmartDialog.showToast('not supported');
+                              SmartDialog.showToast('暂不支持');
                             }
                             break;
                         }
@@ -527,13 +527,13 @@ class _FeedPageState extends State<FeedPage> with TickerProviderStateMixin {
                                 value: item,
                                 child: item == FeedMenuItem.Fav
                                     ? Text(
-                                        _feedController.isFav ? 'UnFav' : 'Fav',
+                                        _feedController.isFav ? '取消收藏' : '收藏',
                                       )
                                     : item == FeedMenuItem.Block
                                         ? Text(
                                             _feedController.isBlocked
-                                                ? 'Unblock'
-                                                : 'Block',
+                                                ? '取消屏蔽'
+                                                : '屏蔽',
                                           )
                                         : Text(item.name),
                               ))
