@@ -77,7 +77,7 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
         }
       } else {
         setState(() => _loadingState =
-            LoadingState.error('statusCode: ${response.statusCode}'));
+            LoadingState.error('请求失败：HTTP ${response.statusCode}'));
       }
     } catch (e) {
       setState(() => _loadingState = LoadingState.error(e.toString()));
