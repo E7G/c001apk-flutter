@@ -265,11 +265,11 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: TopicMenuItem.Copy,
-                        child: Text(TopicMenuItem.Copy.name),
+                        child: const Text('复制'),
                       ),
                       PopupMenuItem(
                         value: TopicMenuItem.Share,
-                        child: Text(TopicMenuItem.Share.name),
+                        child: const Text('分享'),
                       ),
                       if (_shouldShowActions)
                         PopupMenuItem(
@@ -278,7 +278,7 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
                             children: [
                               Expanded(
                                 flex: 1,
-                                child: Text(TopicMenuItem.Sort.name),
+                                child: const Text('排序'),
                               ),
                               const Icon(Icons.arrow_right)
                             ],
@@ -333,7 +333,14 @@ class _TopicPageState extends State<TopicPage> with TickerProviderStateMixin {
       position:
           RelativeRect.fromLTRB(screenSize.width, 0, 0, screenSize.height),
       items: TopicSortType.values
-          .map((type) => PopupMenuItem(value: type, child: Text(type.name)))
+          .map((type) => PopupMenuItem(
+                value: type,
+                child: Text(switch (type) {
+                  TopicSortType.DEFAULT => '默认',
+                  TopicSortType.DATELINE => '最新',
+                  TopicSortType.HOT => '热门',
+                }),
+              ))
           .toList(),
       elevation: 8.0,
     ).then((value) {
