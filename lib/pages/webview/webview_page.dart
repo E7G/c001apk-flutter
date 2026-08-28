@@ -29,43 +29,120 @@ class _WebviewPageState extends State<WebviewPage> {
   final _progressStream = StreamController<double>();
 
   InAppWebViewController? _webViewController;
+  late final Future<void> _cookieReady;
+  bool _loginFinished = false;
 
   @override
   void initState() {
     super.initState();
-    CookieManager().deleteAllCookies();
-    if (GlobalData().isLogin) {
-      CookieManager().setCookie(
-        url: WebUri.uri(Uri.parse('.coolapk.com')),
-        name: 'DID',
-        value: GStorage.szlmId,
-      );
-      CookieManager().setCookie(
-        url: WebUri.uri(Uri.parse('.coolapk.com')),
+    _cookieReady = _prepareCookies();
+  }
+
+  Future<void> _prepareCookies() async {
+    final cookieManager = CookieManager();
+
+    // Login should always start from a clean web session. Await the deletion
+    // to avoid racing with the first navigation and deleting fresh cookies.
+    if (_isLogin) {
+      await cookieManager.deleteAllCookies();
+      await cookieManager.setCookie(
+        url: WebUri.uri(Uri.parse('https://account.coolapk.com/')),
         name: 'forward',
-        value: 'https://www.coolapk.com',
+        value: Constants.URL_COOLAPK,
       );
-      CookieManager().setCookie(
-        url: WebUri.uri(Uri.parse('.coolapk.com')),
+      if (GStorage.szlmId.isNotEmpty) {
+        await cookieManager.setCookie(
+          url: WebUri.uri(Uri.parse('https://account.coolapk.com/')),
+          name: 'DID',
+          value: GStorage.szlmId,
+        );
+      }
+      return;
+    }
+
+    if (GlobalData().isLogin) {
+      final url = WebUri.uri(Uri.parse(Constants.URL_COOLAPK));
+      if (GStorage.szlmId.isNotEmpty) {
+        await cookieManager.setCookie(
+          url: url,
+          name: 'DID',
+          value: GStorage.szlmId,
+        );
+      }
+      await cookieManager.setCookie(
+        url: url,
         name: 'displayVersion',
         value: 'v14',
       );
-      CookieManager().setCookie(
-        url: WebUri.uri(Uri.parse('.coolapk.com')),
+      await cookieManager.setCookie(
+        url: url,
         name: 'uid',
         value: GlobalData().uid,
       );
-      CookieManager().setCookie(
-        url: WebUri.uri(Uri.parse('.coolapk.com')),
+      await cookieManager.setCookie(
+        url: url,
         name: 'username',
         value: GlobalData().username,
       );
-      CookieManager().setCookie(
-        url: WebUri.uri(Uri.parse('.coolapk.com')),
+      await cookieManager.setCookie(
+        url: url,
         name: 'token',
         value: GlobalData().token,
       );
+      if (GlobalData().SESSID.startsWith('SESSID=')) {
+        await cookieManager.setCookie(
+          url: url,
+          name: 'SESSID',
+          value: GlobalData().SESSID.substring('SESSID='.length),
+        );
+      }
     }
+  }
+
+  Future<bool> _tryCompleteLogin() async {
+    if (!_isLogin || _loginFinished) {
+      return false;
+    }
+
+    final cookieManager = CookieManager();
+    final cookieUrls = <String>[
+      Constants.URL_COOLAPK,
+      'https://account.coolapk.com/',
+    ];
+
+    String? uid;
+    String? username;
+    String? token;
+    String? sessid;
+
+    for (final cookieUrl in cookieUrls) {
+      final url = WebUri.uri(Uri.parse(cookieUrl));
+      uid ??= (await cookieManager.getCookie(url: url, name: 'uid'))?.value;
+      username ??=
+          (await cookieManager.getCookie(url: url, name: 'username'))?.value;
+      token ??=
+          (await cookieManager.getCookie(url: url, name: 'token'))?.value;
+      sessid ??=
+          (await cookieManager.getCookie(url: url, name: 'SESSID'))?.value;
+    }
+
+    if (uid.isNullOrEmpty || username.isNullOrEmpty || token.isNullOrEmpty) {
+      return false;
+    }
+
+    _loginFinished = true;
+    GStorage.setUid(uid!);
+    GStorage.setUsername(username!);
+    GStorage.setToken(token!);
+    GStorage.setSessid(
+      sessid.isNullOrEmpty ? '' : 'SESSID=$sessid',
+    );
+    GStorage.setIsLogin(true);
+
+    if (mounted) {
+      Get.back(result: true);
+    }
+    return true;
   }
 
   @override
@@ -162,7 +239,21 @@ class _WebviewPageState extends State<WebviewPage> {
           )
         ],
       ),
-      body: InAppWebView(
+      body: FutureBuilder<void>(
+        future: _cookieReady,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text('初始化登录环境失败：${snapshot.error}'),
+              ),
+            );
+          }
+          return InAppWebView(
         initialSettings: InAppWebViewSettings(
           useHybridComposition: false,
           mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
@@ -203,37 +294,16 @@ class _WebviewPageState extends State<WebviewPage> {
             return NavigationActionPolicy.CANCEL;
           }
 
-          if (_isLogin && url == Constants.URL_COOLAPK) {
-            String uid = (await CookieManager().getCookie(
-              url: WebUri.uri(Uri.parse(Constants.URL_COOLAPK)),
-              name: 'uid',
-            ))
-                ?.value;
-            String username = (await CookieManager().getCookie(
-              url: WebUri.uri(Uri.parse(Constants.URL_COOLAPK)),
-              name: 'username',
-            ))
-                ?.value;
-            String token = (await CookieManager().getCookie(
-              url: WebUri.uri(Uri.parse(Constants.URL_COOLAPK)),
-              name: 'token',
-            ))
-                ?.value;
-            if (!uid.isNullOrEmpty &&
-                !username.isNullOrEmpty &&
-                !token.isNullOrEmpty) {
-              GStorage.setUid(uid);
-              GStorage.setUsername(username);
-              GStorage.setToken(token);
-              GStorage.setIsLogin(true);
-              Get.back(result: true);
-            } else {
-              Get.back(result: false);
-            }
+          if (_isLogin && await _tryCompleteLogin()) {
             return NavigationActionPolicy.CANCEL;
           }
 
           return NavigationActionPolicy.ALLOW;
+        },
+        onLoadStop: (controller, url) async {
+          if (_isLogin) {
+            await _tryCompleteLogin();
+          }
         },
         onDownloadStartRequest: (controller, request) {
           showDialog(
@@ -270,6 +340,8 @@ class _WebviewPageState extends State<WebviewPage> {
                 );
               });
           _progressStream.add(1);
+        },
+      );
         },
       ),
     );
