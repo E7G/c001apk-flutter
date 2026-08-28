@@ -118,7 +118,12 @@ class ApiInterceptor extends Interceptor {
       options.headers['X-App-Mode'] = Constants.MODE;
       options.headers['X-App-Supported'] = versionCode;
       options.headers['Cookie'] = GlobalData().isLogin
-          ? 'uid=${GlobalData().uid}; username=${GlobalData().username}; token=${GlobalData().token}'
+          ? [
+              if (GlobalData().SESSID.isNotEmpty) GlobalData().SESSID,
+              'uid=${GlobalData().uid}',
+              'username=${GlobalData().username}',
+              'token=${GlobalData().token}',
+            ].join('; ')
           : GlobalData().SESSID;
     }
 
