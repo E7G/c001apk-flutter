@@ -65,24 +65,7 @@ class FeedController extends CommonController {
         await NetworkRepo.getDataFromUrl(url: '/v6/feed/detail?id=$id');
     if (response is Success) {
       Datum data = (response.response as Datum);
-      if (data.messageRawOutput != 'null') {
-        List<dynamic> jsonList = jsonDecode(data.messageRawOutput!);
-        articleList = jsonList
-            .map((json) => FeedArticle.fromJson(json))
-            .where((item) => ['text', 'image', 'shareUrl'].contains(item.type))
-            .toList();
-        if (!data.title.isNullOrEmpty) {
-          articleList!.insert(0, FeedArticle(type: 'title', title: data.title));
-        }
-        if (!data.messageCover.isNullOrEmpty) {
-          articleList!
-              .insert(0, FeedArticle(type: 'image', url: data.messageCover));
-        }
-        articleImgList = articleList!
-            .where((item) => item.type == 'image')
-            .map((item) => item.url.orEmpty)
-            .toList();
-      }
+      _parseArticleContent(data);
       if (!data.topReplyRows.isNullOrEmpty) {
         topReply = data.topReplyRows![0];
       }
@@ -103,6 +86,73 @@ class FeedController extends CommonController {
       }
     }
     feedState.value = response;
+  }
+
+  void _parseArticleContent(Datum data) {
+    articleList = null;
+    articleImgList = null;
+
+    final rawOutput = data.messageRawOutput?.trim();
+    if (rawOutput == null || rawOutput.isEmpty || rawOutput == 'null') {
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawOutput);
+      if (decoded is! List) {
+        return;
+      }
+
+      final parsed = decoded
+          .whereType<Map>()
+          .map((json) =>
+              FeedArticle.fromJson(Map<String, dynamic>.from(json)))
+          .where((item) => ['text', 'image', 'shareUrl'].contains(item.type))
+          .toList();
+
+      // CoolApk may return rich-media blocks in message_raw_output while
+      // keeping the actual body text in the top-level message field.
+      // If we switch to article mode without adding that body, the detail
+      // page renders only the author/title/media even though the feed preview
+      // can still show the message.
+      final hasText = parsed.any(
+        (item) => item.type == 'text' && !item.message.isNullOrEmpty,
+      );
+      if (!hasText && !data.message.isNullOrEmpty) {
+        parsed.insert(
+          0,
+          FeedArticle(type: 'text', message: data.message),
+        );
+      }
+
+      // If none of the rich blocks are supported, leave articleList null so
+      // FeedPage falls back to FeedCard and renders data.message/picArr/etc.
+      if (parsed.isEmpty) {
+        return;
+      }
+
+      if (!data.title.isNullOrEmpty) {
+        parsed.insert(0, FeedArticle(type: 'title', title: data.title));
+      }
+      if (!data.messageCover.isNullOrEmpty) {
+        parsed.insert(0, FeedArticle(type: 'image', url: data.messageCover));
+      }
+
+      articleList = parsed;
+      articleImgList = parsed
+          .where((item) => item.type == 'image')
+          .map((item) => item.url.orEmpty)
+          .where((url) => url.isNotEmpty)
+          .toList();
+    } on FormatException {
+      // API formats have changed before. A malformed/new rich-text payload
+      // must not hide the normal feed body; fall back to FeedCard instead.
+      articleList = null;
+      articleImgList = null;
+    } on TypeError {
+      articleList = null;
+      articleImgList = null;
+    }
   }
 
   void onFav() {
