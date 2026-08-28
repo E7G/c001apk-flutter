@@ -24,6 +24,7 @@ class MainController extends GetxController {
             GStorage.setUid('');
             GStorage.setUsername('');
             GStorage.setToken('');
+            GStorage.setSessid('');
             GStorage.setIsLogin(false);
           }
         } else {
@@ -47,7 +48,7 @@ class MainController extends GetxController {
     try {
       String? SESSID = response.headers['Set-Cookie']?[0];
       if (SESSID != null) {
-        GlobalData().SESSID = SESSID.substring(0, SESSID.indexOf(';'));
+        GStorage.setSessid(SESSID.substring(0, SESSID.indexOf(';')));
       }
     } catch (e) {
       debugPrint('failed to get SESSID: ${e.toString()}');
