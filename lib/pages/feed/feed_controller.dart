@@ -131,10 +131,30 @@ class FeedController extends CommonController {
         return;
       }
 
+      final imageUrls = parsed
+          .where((item) => item.type == 'image')
+          .map((item) => item.url.orEmpty)
+          .where((url) => url.isNotEmpty)
+          .toSet();
+
+      // Some feed details keep images only in the top-level picArr/pic fields
+      // even when message_raw_output exists. Once article mode is enabled,
+      // FeedCard is no longer used, so those images must be merged explicitly.
+      if (!data.picArr.isNullOrEmpty) {
+        for (final url in data.picArr!) {
+          if (url.isNotEmpty && imageUrls.add(url)) {
+            parsed.add(FeedArticle(type: 'image', url: url));
+          }
+        }
+      } else if (!data.pic.isNullOrEmpty && imageUrls.add(data.pic!)) {
+        parsed.add(FeedArticle(type: 'image', url: data.pic));
+      }
+
       if (!data.title.isNullOrEmpty) {
         parsed.insert(0, FeedArticle(type: 'title', title: data.title));
       }
-      if (!data.messageCover.isNullOrEmpty) {
+      if (!data.messageCover.isNullOrEmpty &&
+          imageUrls.add(data.messageCover!)) {
         parsed.insert(0, FeedArticle(type: 'image', url: data.messageCover));
       }
 
