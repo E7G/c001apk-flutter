@@ -138,6 +138,7 @@ class GStorage {
     GlobalData().uid = uid;
     GlobalData().username = username;
     GlobalData().token = token;
+    GlobalData().SESSID = sessid;
   }
 
   static void regAdapter() {
@@ -417,6 +418,15 @@ class GStorage {
     GlobalData().token = value;
   }
 
+  static String get sessid {
+    return settings.get(SettingsBoxKey.sessid, defaultValue: '');
+  }
+
+  static void setSessid(String value) {
+    settings.put(SettingsBoxKey.sessid, value);
+    GlobalData().SESSID = value;
+  }
+
   static String get userAvatar {
     return settings.get(SettingsBoxKey.userAvatar, defaultValue: '');
   }
@@ -486,6 +496,7 @@ class SettingsBoxKey {
       uid = 'uid',
       username = 'username',
       token = 'token',
+      sessid = 'sessid',
       userAvatar = 'userAvatar',
       exp = 'exp',
       nextExp = 'nextExp',
