@@ -38,6 +38,8 @@ class _LoginPageState extends State<LoginPage> {
   final FocusNode _captchaFocusNode = FocusNode();
   String? _requestHash;
   bool _showCaptcha = false;
+  bool _legacyInitialized = false;
+  bool _openingWebLogin = false;
   final _captchaImg = StreamController<Uint8List?>();
 
   String urlPreGetParam = '/auth/login?type=mobile';
@@ -46,8 +48,39 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+  }
+
+  void _prepareLegacyLogin() {
+    if (_legacyInitialized) {
+      return;
+    }
+    _legacyInitialized = true;
     TokenUtils.isPreGetLoginParam = true;
     _onGetLoginParam(urlPreGetParam);
+  }
+
+  Future<void> _openWebLogin() async {
+    if (_openingWebLogin || !Utils.isSupportWebview()) {
+      return;
+    }
+
+    setState(() => _openingWebLogin = true);
+    try {
+      final result = await Get.toNamed('/webview', parameters: {
+        'url': Constants.URL_LOGIN,
+        'isLogin': '1',
+      });
+      if (result == true) {
+        SmartDialog.showToast('登录成功');
+        if (mounted) {
+          Get.back(result: true);
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _openingWebLogin = false);
+      }
+    }
   }
 
   String? _getParam(List<String>? cookies, String param) {
@@ -86,24 +119,35 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _onLogin() async {
     TokenUtils.isOnLogin = true;
     try {
+      if (_requestHash.isNullOrEmpty) {
+        SmartDialog.showToast('登录参数尚未准备好，请稍后重试');
+        _prepareLegacyLogin();
+        return;
+      }
       Response response = await NetworkRepo.onLogin(
           _requestHash!,
           _accountController.text,
           _pwdController.text,
           _captchaController.text);
+      final dynamic loginJson =
+          response.data is String ? jsonDecode(response.data) : response.data;
       LoginResponse loginResponse =
-          LoginResponse.fromJson(jsonDecode(response.data));
+          LoginResponse.fromJson(Map<String, dynamic>.from(loginJson));
       if (loginResponse.status == 1) {
         List<String>? cookies = response.headers['Set-Cookie'];
         String? uid = _getParam(cookies, 'uid');
         String? username = _getParam(cookies, 'username');
         String? token = _getParam(cookies, 'token');
+        String? sessid = _getParam(cookies, 'SESSID');
         if (!uid.isNullOrEmpty &&
             !username.isNullOrEmpty &&
             !token.isNullOrEmpty) {
           GStorage.setUid(uid!);
           GStorage.setUsername(username!);
           GStorage.setToken(token!);
+          GStorage.setSessid(
+            sessid.isNullOrEmpty ? GlobalData().SESSID : 'SESSID=$sessid',
+          );
           GStorage.setIsLogin(true);
           SmartDialog.showToast('登录成功');
           Get.back(result: true);
@@ -112,7 +156,8 @@ class _LoginPageState extends State<LoginPage> {
         if (!loginResponse.message.isNullOrEmpty) {
           SmartDialog.showToast(loginResponse.message!);
         }
-        if (loginResponse.message == '图形验证码不能为空", "图形验证码错误' ||
+        if (loginResponse.message == '图形验证码不能为空' ||
+            loginResponse.message == '图形验证码错误' ||
             (_showCaptcha && loginResponse.message == '密码错误')) {
           _onGetCaptcha();
         }
@@ -180,24 +225,7 @@ class _LoginPageState extends State<LoginPage> {
           preferredSize: Size.zero,
           child: Divider(height: 1),
         ),
-        actions: [
-          if (Utils.isSupportWebview())
-            TextButton(
-              onPressed: () async {
-                dynamic result = await Get.toNamed('/webview', parameters: {
-                  'url': Constants.URL_LOGIN,
-                  'isLogin': '1',
-                });
-                if (result == true) {
-                  SmartDialog.showToast('登录成功');
-                  Get.back(result: true);
-                } else if (result == false) {
-                  SmartDialog.showToast('网页登录失败');
-                }
-              },
-              child: const Text('网页登录'),
-            ),
-        ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -209,10 +237,89 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
+                width: 500,
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.verified_user_outlined,
+                          size: 42,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '酷安官方授权登录',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '推荐使用官方网页登录。支持当前酷安登录验证流程，完成后会自动同步登录状态。',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: Utils.isSupportWebview() &&
+                                    !_openingWebLogin
+                                ? _openWebLogin
+                                : null,
+                            icon: _openingWebLogin
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.login),
+                            label: Text(
+                              _openingWebLogin ? '正在打开…' : '使用酷安账号登录',
+                            ),
+                          ),
+                        ),
+                        if (!Utils.isSupportWebview()) ...[
+                          const SizedBox(height: 10),
+                          const Text('当前平台暂不支持内置网页登录，请使用下方兼容登录。'),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: 500,
+                child: Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        '兼容账号密码登录',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
                 width: 500.0,
                 child: TextField(
                   controller: _accountController,
-                  autofocus: true,
+                  autofocus: false,
+                  onTap: _prepareLegacyLogin,
                   onChanged: (value) => _showClearAccount.add(value.isNotEmpty),
                   textInputAction: TextInputAction.next,
                   onSubmitted: (value) => _pwdFocusNode.requestFocus(),
